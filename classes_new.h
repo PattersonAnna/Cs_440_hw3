@@ -23,7 +23,7 @@ public:
     }
 
     //You may use this for debugging / showing the record to standard output.
-    void print() {
+    void print() const{
         cout << "\tID: " << id << "\n";
         cout << "\tNAME: " << name << "\n";
         cout << "\tBIO: " << bio << "\n";
@@ -46,6 +46,7 @@ public:
         oss.write(name.c_str(), name.size()); // writes the name in binary form
         oss.write(reinterpret_cast<const char*>(&bio_len), sizeof(bio_len)); // // Writes the size of the Bio in binary format.
         oss.write(bio.c_str(), bio.size()); // writes bio in binary form
+        return oss.str(); //return the serilized string
     }
 };
 
@@ -86,7 +87,7 @@ public:
         for (const auto& record : records) { // Writing the records into the page_data
             string serialized = record.serialize();
 
-            memcpy(page_data + offset, serialized.c_str(), serialized.size());
+            memcpy(page_data + offset, serialized.c_str(), serialized.size()); //this is line 89
 
             offset += serialized.size();
         }
@@ -219,10 +220,24 @@ public:
 
         // TO_DO: Read pages from your data file (using read_from_data_file) and search for the employee ID in those pages. Be mindful of the page limit in main memory.
         int page_number = 0;
-        while(buffer[page_number].read_from_data_file(data_file)){
+        while(buffer[page_number].read_from_data_file(data_file)){  
+            for(size_t i = 0; i < buffer[page_number].records.size(); i++){ //interating through all of the records on the current page
+                const Record& record = buffer[page_number].records[i];  //get the current record from the page so the id can be looked at
+                if(record.id == searchId){
+                    record.print();
+                    return;
+                }
+            }
 
+            page_number++; // Move to the next page in the buffer
+
+            if (page_number >= buffer.size()) { // If the limit of the buffer size is hit, reset to 0 for future searchs
+                page_number = 0;
+            }
         }
         // TO_DO: Print "Record not found" if no records match.
-
+        cout << "The employee you are looking for does not exist" << endl;
+        data_file.clear();  //clear all of the errors on the file stream
+        data_file.seekg(0, ios::beg);
     }
 };

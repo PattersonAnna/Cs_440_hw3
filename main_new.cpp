@@ -17,6 +17,7 @@ using namespace std;
 
 
 int main(int argc, char* const argv[]) {
+    int user_input = -1;
 
     // Initialize the Storage Manager Class with the Binary .dat file name we want to create
     StorageManager manager("EmployeeRelation.dat");
@@ -26,6 +27,15 @@ int main(int argc, char* const argv[]) {
     manager.createFromFile("Employee.csv");
 
     // TODO: You'll receive employee IDs as arguments, process them to retrieve the record, or display a message if not found. 
+    while(user_input != 0){
+        cout << "Enter the employee Id you would like to find(enter 0 to exit): ";
+        cin >> user_input;
+
+        if(user_input == 0){
+            break;
+        }
+        manager.findAndPrintEmployee(user_input);
+    }
 
     return 0;
 }
